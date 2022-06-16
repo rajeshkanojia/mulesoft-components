@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="dataweaveflow" doc:id="55512df4-669f-4e7d-94b2-d4397d8592d4" >
+		<http:listener doc:name="Listener" doc:id="d679d90d-c768-4070-854f-e63fce6181a9" config-ref="HTTP_Listener_config" path="/dataweave/*" />
+		<set-variable value='#[lower((attributes.requestUri splitBy("/") filter((item, index) -&gt; item != ""))[1])]' doc:name="Set Variable" doc:id="e1728d21-40ac-4a71-aad5-837409458148" variableName="getURI"/>
+		<choice doc:name="Choice" doc:id="724f5be2-cefb-4884-b3b8-008fd679ff5a" >
+			<when expression='#[vars.getURI == "product-wise-sales"]'>
+				<ee:transform doc:name="Transform Message" doc:id="6fb61b60-e83e-43e8-b1e3-dcafe571f973" >
+					<ee:message >
+						<ee:set-payload resource="dwl/product-wise-sales.dwl" />
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression='#[vars.getURI == "total-sale-product-wise"]'>
+				<ee:transform doc:name="Transform Message" doc:id="7dfea17b-50ff-4d7a-ba19-ef6cc8550c26" >
+					<ee:message >
+						<ee:set-payload resource="dwl/total-sale-product-wise.dwl" />
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression='#[vars.getURI == "customer-wise-sale"]'>
+				<ee:transform doc:name="Transform Message" doc:id="3ff60377-24b5-4ece-a44e-e1925e3aec2e" >
+					<ee:message >
+						<ee:set-payload resource="dwl/customer-wise-sale.dwl" />
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression='#[vars.getURI == "country-wise-sale"]'>
+				<ee:transform doc:name="Transform Message" doc:id="e132f0e4-7306-4acb-a618-03fc50a464c1" >
+					<ee:message >
+						<ee:set-payload resource="dwl/country-wise-sale.dwl" />
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="ceff8b0c-cfb1-432a-bd5c-2a4570262215">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+var salesData = readUrl("classpath://sample-data/sales-data.csv", "application/csv")
+output application/json
+---
+salesData]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>

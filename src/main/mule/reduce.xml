@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="139e83c0-6f82-4c39-92b0-43b993c15f48" >
+		<http:listener-connection host="${http.host}" port="${http.port}" />
+	</http:listener-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="3a606dc2-f4ea-4548-90bb-14e1db18deb2" file="config.yaml" />
+	<flow name="reduceFlow" doc:id="cc8423f5-9bf2-4b8f-82bd-9d1dd1e7ea35" >
+		<http:listener doc:name="Listener" doc:id="d2969964-6672-4564-aee8-1052d0c13ad2" path="/reduce" config-ref="HTTP_Listener_config"/>
+		<ee:transform doc:name="Transform Message" doc:id="23b37ca2-d148-4339-bddf-9c8da7b6ab6b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+var salesData = readUrl("classpath://sample-data/sales-data.csv", "application/csv")
+output application/json
+var totalAmount = 0
+---
+(salesData groupBy $.StockCode)pluck(item, key, index) -> { 
+		"code" : item.StockCode[0] as String,
+		"title" : item.Description[0] as String,
+		"sales" : item map{ 
+			"invoice" : $.InvoiceNo as String,
+			"date" : $.InvoiceDate as String,
+			"quantity" : $.Quantity as String,
+			"unitprice" : $.UnitPrice as String,
+			"customerID" : $.CustomerID as String,
+			"country" : $.Country  as String					
+		}
+	} 
+
+ 
+/*
+(salesData groupBy $.StockCode) pluck(item, key, index) -> {
+	"code" : item.StockCode[0],
+	"title" : item.Description[0],
+	"sales" : {
+		"invoice" : item.InvoiceNo,
+		"date" : item.InvoiceDate,
+		"quantity" : item.Quantity,
+		"unitprice" : item.UnitPrice,
+		"customerID" : item.CustomerID,
+		"country" : item.Country
+	}
+}
+*/
+
+
+/*
+(salesData groupBy $.StockCode) pluck(item, key, index) -> {
+		"code" : key, 
+		"title" : item.Description[0], 
+		"total" : item reduce((element, acc=0) -> acc + (element.Quantity as Number * element.UnitPrice as Number))
+}
+*/]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
