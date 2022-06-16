@@ -10,28 +10,28 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<set-variable value='#[lower((attributes.requestUri splitBy("/") filter((item, index) -&gt; item != ""))[1])]' doc:name="Set Variable" doc:id="e1728d21-40ac-4a71-aad5-837409458148" variableName="getURI"/>
 		<choice doc:name="Choice" doc:id="724f5be2-cefb-4884-b3b8-008fd679ff5a" >
 			<when expression='#[vars.getURI == "product-wise-sales"]'>
-				<ee:transform doc:name="Transform Message" doc:id="6fb61b60-e83e-43e8-b1e3-dcafe571f973" >
+				<ee:transform doc:name="product wise sales" doc:id="6fb61b60-e83e-43e8-b1e3-dcafe571f973" >
 					<ee:message >
 						<ee:set-payload resource="dwl/product-wise-sales.dwl" />
 					</ee:message>
 				</ee:transform>
 			</when>
 			<when expression='#[vars.getURI == "total-sale-product-wise"]'>
-				<ee:transform doc:name="Transform Message" doc:id="7dfea17b-50ff-4d7a-ba19-ef6cc8550c26" >
+				<ee:transform doc:name="total sale product wise" doc:id="7dfea17b-50ff-4d7a-ba19-ef6cc8550c26" >
 					<ee:message >
 						<ee:set-payload resource="dwl/total-sale-product-wise.dwl" />
 					</ee:message>
 				</ee:transform>
 			</when>
 			<when expression='#[vars.getURI == "customer-wise-sale"]'>
-				<ee:transform doc:name="Transform Message" doc:id="3ff60377-24b5-4ece-a44e-e1925e3aec2e" >
+				<ee:transform doc:name="customer wise sale" doc:id="3ff60377-24b5-4ece-a44e-e1925e3aec2e" >
 					<ee:message >
 						<ee:set-payload resource="dwl/customer-wise-sale.dwl" />
 					</ee:message>
 				</ee:transform>
 			</when>
 			<when expression='#[vars.getURI == "country-wise-sale"]'>
-				<ee:transform doc:name="Transform Message" doc:id="e132f0e4-7306-4acb-a618-03fc50a464c1" >
+				<ee:transform doc:name="country wise sale" doc:id="e132f0e4-7306-4acb-a618-03fc50a464c1" >
 					<ee:message >
 						<ee:set-payload resource="dwl/country-wise-sale.dwl" />
 					</ee:message>
