@@ -1,0 +1,26 @@
+Module Name : Scheduler
+Connector and Component used:
+	Scheduler
+	Object Store
+	HTTP
+	File
+Module Description : 
+	In this dummy project I am reading a json file (location : resources/sample-data/user-data.json) which contains user data like.
+	{
+		"name": "Quinn Jackson",
+		"phone": "1-385-262-4786",
+		"email": quinnjackson@yopmail.com,
+		"address": "P.O. Box 779, 7458 Egestas Av.",
+		"postalZip": "23W 7S7",
+		"region": "Huáběi",
+		"country": "Costa Rica"
+	},  
+
+ 
+    My scheduler fetch single object in every 2 seconds from the file and send it to http://localhost:8081/listener through HTTP Request connector. To track the index number I use Object store. At HTTP Listener connector end which is working as receiver, simply receive the payload and store it in json file with specific country name under resources/output folder.
+
+Important takeaway :
+	How scheduler works
+	How to maintain state using Object store
+
+*************************************************************************************************************
