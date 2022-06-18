@@ -19,8 +19,8 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 	</file:config>
 	<flow name="schedulerFlow" doc:id="69d49ed7-4f8b-4757-aeab-67be2ebd269b" >
 		<http:listener doc:name="Listener" doc:id="0df6aab9-b45c-4efb-9a55-05e7c05e4121" config-ref="HTTP_Listener_config" path="/listener"/>
-		<set-variable value='#[lower(payload.country replace  " " with "-") ++ ".json"]' doc:name="Set Variable" doc:id="31d4691d-2444-4afc-8178-46ff513881c2" variableName="setFilePath"/>
-		<file:write doc:name="Write" doc:id="7acc525a-90f2-4068-9394-00b604859274" config-ref="Write_File_Config" path="#[p('file.writePath') ++ vars.setFilePath]" mode="APPEND"/>
+		<set-variable value='#[lower(payload.country replace  " " with "-") ++ ".json"]' doc:name='replace the space with -' doc:id="31d4691d-2444-4afc-8178-46ff513881c2" variableName="setFilePath"/>
+		<file:write doc:name="Write the json object specific file" doc:id="7acc525a-90f2-4068-9394-00b604859274" config-ref="Write_File_Config" path="#[p('file.writePath') ++ vars.setFilePath]" mode="APPEND"/>
 		<logger level="INFO" doc:name="Logger" doc:id="506023ef-2751-4cdc-9afe-27b5485f4eec" message='#[vars.setFilePath]' />
 	</flow>
 	<flow name="schedulerFlow1" doc:id="025f4f83-28d1-47ef-a743-17e836483eb0" >
@@ -29,30 +29,28 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 				<fixed-frequency frequency="2" timeUnit="SECONDS"/>
 			</scheduling-strategy>
 		</scheduler>
-		<os:contains doc:name="Contains" doc:id="7e708eca-fdd5-428f-ad24-38e66b93ccb4" objectStore="StoreLoopIndexValue" key="indexNumber" target="indexNumberStatus"/>
+		<os:contains doc:name="Check for indexNumer" doc:id="7e708eca-fdd5-428f-ad24-38e66b93ccb4" objectStore="StoreLoopIndexValue" key="indexNumber" target="indexNumberStatus"/>
 		<choice doc:name="Choice" doc:id="5db2ad0c-2cb8-46c3-b3ea-b845cdd2094c">
 			<when expression="#[vars.indexNumberStatus == true]">
 				<os:retrieve doc:name="Retrieve start Index" doc:id="441fbe2a-aa4a-41d4-b802-ee331340db6c" key='#["indexNumber"]' target="startIndex" objectStore="StoreLoopIndexValue"/>
 				<set-variable value="#[vars.startIndex as Number + 1]" doc:name="Set stop index" doc:id="bf5eb7a1-36ce-47fc-81ab-a56da861add6" variableName="stopIndex"/>
-				<file:read doc:name="Read" doc:id="019a73ae-47f0-4b82-973e-b481556931c0" config-ref="Read_File_Config" path="#[p('file.readPath') ++  &quot;user-data.json&quot;]" />
-				<ee:transform doc:name="Transform Message" doc:id="6bc72368-bfaa-4e73-938c-028690af3dbf">
+				<file:read doc:name="Read the file" doc:id="019a73ae-47f0-4b82-973e-b481556931c0" config-ref="Read_File_Config" path="#[p('file.readPath') ++  &quot;user-data.json&quot;]" />
+				<ee:transform doc:name="Extract the object based on index Number" doc:id="6bc72368-bfaa-4e73-938c-028690af3dbf">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 import * from dw::core::Arrays
 output application/json
 ---
-//slice(payload as Array, vars.startIndex as Number, vars.startIndex as Number)
-//slice(payload as Array, vars.startIndex as Number, vars.stopIndex as Number)
 payload[vars.startIndex as Number]]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-				<http:request method="POST" doc:name="Request" doc:id="4c367ae3-331d-4d1f-8cf1-697df683b774" config-ref="HTTP_Request_configuration" path="/listener">
+				<http:request method="POST" doc:name="Make the request to listener" doc:id="4c367ae3-331d-4d1f-8cf1-697df683b774" config-ref="HTTP_Request_configuration" path="/listener">
 					<http:body ><![CDATA[#[%dw 2.0
 output application/json
 ---
 payload]]]></http:body>
 				</http:request>
-				<os:store doc:name="Store" doc:id="47d6e59f-8818-4005-9b89-97e199bd9e18" key="indexNumber" objectStore="StoreLoopIndexValue">
+				<os:store doc:name="update the index value in object store" doc:id="47d6e59f-8818-4005-9b89-97e199bd9e18" key="indexNumber" objectStore="StoreLoopIndexValue">
 					<os:value ><![CDATA[#[vars.stopIndex]]]></os:value>
 				</os:store>
 			</when>
