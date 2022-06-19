@@ -7,7 +7,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<flow name="dataweaveflow" doc:id="55512df4-669f-4e7d-94b2-d4397d8592d4" >
 		<http:listener doc:name="Listener" doc:id="d679d90d-c768-4070-854f-e63fce6181a9" config-ref="HTTP_Listener_config" path="/dataweave/*" />
-		<set-variable value='#[lower((attributes.requestUri splitBy("/") filter((item, index) -&gt; item != ""))[1])]' doc:name="Set Variable" doc:id="e1728d21-40ac-4a71-aad5-837409458148" variableName="getURI"/>
+		<set-variable value='#[lower((attributes.requestUri splitBy("/") filter((item, index) -&gt; item != ""))[1])]' doc:name="getURI" doc:id="e1728d21-40ac-4a71-aad5-837409458148" variableName="getURI"/>
 		<choice doc:name="Choice" doc:id="724f5be2-cefb-4884-b3b8-008fd679ff5a" >
 			<when expression='#[vars.getURI == "product-wise-sales"]'>
 				<ee:transform doc:name="product wise sales" doc:id="6fb61b60-e83e-43e8-b1e3-dcafe571f973" >
@@ -37,16 +37,16 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 					</ee:message>
 				</ee:transform>
 			</when>
-			<otherwise >
-				<ee:transform doc:name="Transform Message" doc:id="ceff8b0c-cfb1-432a-bd5c-2a4570262215">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
+			<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="a591b4fe-504a-4833-b335-e4e3b3f32635" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
 var salesData = readUrl("classpath://sample-data/sales-data.csv", "application/csv")
 output application/json
 ---
 salesData]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
+					</ee:message>
+				</ee:transform>
 			</otherwise>
 		</choice>
 	</flow>

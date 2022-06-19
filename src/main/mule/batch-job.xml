@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<flow name="batch-jobFlow" doc:id="5acc3294-2676-478f-9c0e-d95c3e4b3899" >
+		<http:listener doc:name="Listener" doc:id="98297b93-2b13-467e-aff6-63cf0031e48e" config-ref="HTTP_Listener_config" path="/transaction"/>
+		<file:read doc:name="Read" doc:id="39c64b16-7d82-4b01-9bf7-2a3199624b83" config-ref="Read_File_Config" path="#[p('file.readPath') ++  &quot;transaction-data.json&quot;]"/>
+	</flow>
+</mule>

@@ -23,4 +23,31 @@ Important takeaway :
 	How scheduler works
 	How to maintain state using Object store
 
-*************************************************************************************************************
+***********************************************************************************************************************************************
+Module Name : Choice Router : Dataweave
+Connector and Component uses: 
+	Choice Router
+	Dataweave
+Module Description :
+	We have Sales data csv file at location resources/sample-data, application reading this file in transform message component through 
+		readUrl("classpath://sample-data/sales-data.csv", "application/csv")
+	Based on uri value application generating json output accordingly, uri values are:
+		product-wise-sales
+		total-sale-product-wise
+		customer-wise-sale
+		country-wise-sale
+
+Dataweave functions used :
+	groupBy
+	pluck
+	map
+	splitBy
+	filter
+	readUrl
+	chaining of various functions			
+
+Important takeaway :
+	How choice router works
+	How to store dataweave code in seperate dwl file and link with Transform message component.
+
+***********************************************************************************************************************************************
