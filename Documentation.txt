@@ -51,3 +51,32 @@ Important takeaway :
 	How to store dataweave code in seperate dwl file and link with Transform message component.
 
 ***********************************************************************************************************************************************
+Module Name : Batch-job
+Connector and Component uses: 
+	Batch job component
+	File
+	Dataweave
+	Object Store
+Module Description :
+	We have 2 csv files names
+	transaction-data.csv - stores the card transaction details of a user. fields(transactionID, accountNumber, cardNumber, transactionStatus, amount, data)
+	transaction-user-data.csv - stores the user details. fields(accountNumber, cardNumber, name, email, address, etc)
+
+	In first phase I simply store the user data in Object store(we can also use database) by making cardNumber as object key.
+
+	In second phase batch job simply iterate over payload and write the output on file(resources/output), i use transactionStaus value(success/fail) in Accept Expression to filter out the data.
+
+	1st batch job store all the success transaction records.
+	2nd batch job store all the failed transaction records.
+	3rd batch job store all the error transaction records.
+
+Dataweave functions used :
+	Mule::lookup
+	-- operator on Json Object
+	store transform message content in dwl file.
+
+Important takeaway :
+	How to call Mule component from dataweave through Mule::lookup()
+	How Object store works
+	How Batch job works
+
