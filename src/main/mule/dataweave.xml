@@ -41,7 +41,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 				<ee:transform doc:name="Transform Message" doc:id="a591b4fe-504a-4833-b335-e4e3b3f32635" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
-var salesData = readUrl("classpath://sample-data/sales-data.csv", "application/csv")
+var salesData = readUrl("classpath://sample-data/sales-data1.csv", "application/csv")
 output application/json
 ---
 salesData]]></ee:set-payload>

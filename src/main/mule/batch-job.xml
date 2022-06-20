@@ -1,13 +1,149 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
-http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<os:object-store name="Transaction-User-Data-Object-store" doc:name="Object store" doc:id="baf799f0-f26b-4e8c-b9f9-e0e028f8039b" entryTtl="60" />
 	<flow name="batch-jobFlow" doc:id="5acc3294-2676-478f-9c0e-d95c3e4b3899" >
-		<http:listener doc:name="Listener" doc:id="98297b93-2b13-467e-aff6-63cf0031e48e" config-ref="HTTP_Listener_config" path="/transaction"/>
-		<file:read doc:name="Read" doc:id="39c64b16-7d82-4b01-9bf7-2a3199624b83" config-ref="Read_File_Config" path="#[p('file.readPath') ++  &quot;transaction-data.json&quot;]"/>
+		<http:listener doc:name="Listener" doc:id="98297b93-2b13-467e-aff6-63cf0031e48e" config-ref="HTTP_Listener_config" path="/transaction" allowedMethods="GET"/>
+		<flow-ref doc:name="Flow Reference" doc:id="4f2183a5-e2a7-4235-b047-83f56b752ae5" name="add-transaction-user-data-in-object-store"/>
+		<ee:transform doc:name="create write files by lookup()" doc:id="5517bb12-aa6a-4aaa-bcb2-9e80e4ac5685">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"successTransaction" : Mule::lookup("transaction-write-file-flow", {"fileName" : "success-transactions.txt", "message" : "success transactions \r\n", "mode" : "APPEND"}, 2000),
+	"failTransaction" : Mule::lookup("transaction-write-file-flow", {"fileName" : "fail-transactions.txt", "message" : "failed transactions \r\n", "mode" : "APPEND"}, 2000),
+	"errorTransaction" : Mule::lookup("transaction-write-file-flow", {"fileName" : "error-transactions.txt", "message" : "error transactions \r\n", "mode" : "APPEND"}, 2000),
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="transaction data" doc:id="33076df7-9148-475a-996d-660b9ef34f2b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+var transactionData = readUrl("classpath://sample-data/transaction-data.csv", "application/csv")
+output application/java
+---
+transactionData map((item) -> 
+	item
+	++ {"transactionStatus" : item."transaction status" as String}
+	++ {"transactionID" : item."transaction number" as String}
+	++ {"accountNumber" : item."account number" as String}
+	++ {"cardNumber" : item."card number" as String}
+	-- {"transaction number" : item."transaction number" as String}
+	-- {"account number" : item."account number" as String}
+	-- {"card number" : item."card number" as String}
+)
+ 
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<batch:job jobName="batch-jobBatch_Job" doc:id="7fc1e959-e22c-4552-a9dc-196bde26b6b3" maxFailedRecords="-1" blockSize="10">
+			<batch:process-records >
+				<batch:step name="processallsuccesstransacations" doc:id="bc528db6-83fb-4c55-8345-70c19376916b" acceptExpression='#[payload.transactionStatus == "success"]'>
+					<set-variable value="#[payload]" doc:name="Set Variable" doc:id="7874f6f4-4456-488c-a2ec-e8f63e494c8b" variableName="transacationDetails"/>
+					<set-variable value="#[payload.cardNumber]" doc:name="set card number" doc:id="c4473a7c-aff0-4e59-8cff-b36fc2ac3aa2" variableName="cardNumber"/>
+					<os:retrieve doc:name="Retrieve user data" doc:id="3dd978a2-2193-4116-b9b3-216023c4fdc4" key="#[vars.cardNumber]" objectStore="Transaction-User-Data-Object-store" target="userDetails">
+						<os:default-value ><![CDATA[""]]></os:default-value>
+					</os:retrieve>
+					<ee:transform doc:name="prepare payload" doc:id="66ccf1ed-f806-45b3-a148-c20f56c2591f" >
+						<ee:message >
+							<ee:set-payload resource="dwl/prepare-transaction-payload.dwl" />
+						</ee:message>
+					</ee:transform>
+					<ee:transform doc:name="write on file" doc:id="e7ff1e83-3a50-48b6-8863-fa8c77a2aa4e" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"successTransaction" : Mule::lookup("transaction-write-file-flow", {"fileName" : "success-transactions.txt", "message" : payload, "mode" : "APPEND"}, 2000),	
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+				</batch:step>
+				<batch:step name="processAllFailedTransactions" doc:id="29f9fe8d-6f92-459e-8231-7065d8b753df" acceptExpression='#[payload.transactionStatus == "fail"]'>
+					<set-variable value="#[payload]" doc:name="Set Variable" doc:id="8200e3d5-7208-429e-9322-c3e3e3b622aa" variableName="transacationDetails" />
+					<set-variable value="#[payload.cardNumber]" doc:name="set card number" doc:id="543395c0-ae9f-4af2-bd25-c247d963b5ab" variableName="cardNumber" />
+					<os:retrieve doc:name="Retrieve user data" doc:id="19210535-919f-4595-ba20-2c8eb3a48a2b" key="#[vars.cardNumber]" objectStore="Transaction-User-Data-Object-store" target="userDetails">
+						<os:default-value><![CDATA[""]]></os:default-value>
+					</os:retrieve>
+					<ee:transform doc:name="prepare payload" doc:id="f89793f4-1d04-4f9e-83f9-7fbcd61dc3f0">
+						<ee:message>
+							<ee:set-payload resource="dwl/prepare-transaction-payload.dwl" />
+						</ee:message>
+					</ee:transform>
+					<ee:transform doc:name="write on file" doc:id="3e94e021-32bc-4750-8088-eaa8e19728a9" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"successTransaction" : Mule::lookup("transaction-write-file-flow", {"fileName" : "fail-transactions.txt", "message" : payload, "mode" : "APPEND"}, 2000),	
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+				</batch:step>
+				<batch:step name="processedErrorTransactions" doc:id="40627d50-3788-4558-a4cb-d75e85cb85cf" acceptPolicy="ONLY_FAILURES">
+					<ee:transform doc:name="prepare payload" doc:id="cfc15086-0fbb-4c9a-b313-15037a46e677" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<ee:transform doc:name="write on file" doc:id="c919f4ae-6ff2-4a2e-a998-c6272bf5ad0b" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"successTransaction" : Mule::lookup("transaction-write-file-flow", {"fileName" : "error-transactions.txt", "message" : payload, "mode" : "APPEND"}, 2000),	
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+				</batch:step>
+			</batch:process-records>
+		</batch:job>
 	</flow>
+	<flow name="transaction-write-file-flow" doc:id="31a4f567-88a0-4380-b184-f48a07640be0" >
+		<file:write doc:name="Write" doc:id="8a96e6b1-111b-453a-8b9b-a185073ebb26" config-ref="Write_File_Config" path="#[p('file.writePath') ++ payload.fileName]" mode="#[payload.mode]">
+			<file:content ><![CDATA[#[%dw 2.0
+output application/json
+---
+payload.message]]]></file:content>
+		</file:write>
+	</flow>
+	<sub-flow name="add-transaction-user-data-in-object-store" doc:id="dd6a95e1-546e-4e4e-998e-e15f4e959d31" >
+		<ee:transform doc:name="transaction user data" doc:id="1f099ad0-b549-4c23-aa61-c063fe97d094">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+var transactionUserData = readUrl("classpath://sample-data/transaction-user-data.csv", "application/csv")
+output application/json
+---
+transactionUserData map( item, index ) ->{
+	"cardNumber" : item."card number",	
+	"details" : item -- {"card number" : item."card number"}
+} 
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="5c4e94ca-cc94-4d7b-a0fb-791e2f037c5d" collection="#[payload]">
+			<set-variable value="#[payload.cardNumber]" doc:name="Set OS key" doc:id="081c6f1c-a77b-4be4-b78f-b2b0643bacc5" variableName="key" />
+			<set-variable value="#[payload.details]" doc:name="Set OS value" doc:id="3abc61e8-89a5-4c95-a877-1d786b549106" variableName="value" />
+			<os:store doc:name="Store user data in OS" doc:id="074f676e-af3e-4682-a9aa-7d87fbb40af1" key="#[vars.key]" objectStore="Transaction-User-Data-Object-store">
+				<os:value><![CDATA[#[vars.value]]]></os:value>
+			</os:store>
+			<remove-variable doc:name="Remove OS Key" doc:id="acda54c3-7478-4b5f-a98e-64fb9fa21e8d" variableName="#[vars.key]" />
+			<remove-variable doc:name="Remove OS value " doc:id="502b3d71-2861-4d84-9804-03ad8503a820" variableName="value" />
+		</foreach>
+	</sub-flow>
 </mule>

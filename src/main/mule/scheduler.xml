@@ -24,11 +24,6 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 		<logger level="INFO" doc:name="Logger" doc:id="506023ef-2751-4cdc-9afe-27b5485f4eec" message='#[vars.setFilePath]' />
 	</flow>
 	<flow name="schedulerFlow1" doc:id="025f4f83-28d1-47ef-a743-17e836483eb0" >
-		<scheduler doc:name="Scheduler" doc:id="f75e106e-9d32-451e-b17a-37ac1d03a880" >
-			<scheduling-strategy >
-				<fixed-frequency frequency="2" timeUnit="SECONDS"/>
-			</scheduling-strategy>
-		</scheduler>
 		<os:contains doc:name="Check for indexNumer" doc:id="7e708eca-fdd5-428f-ad24-38e66b93ccb4" objectStore="StoreLoopIndexValue" key="indexNumber" target="indexNumberStatus"/>
 		<choice doc:name="Choice" doc:id="5db2ad0c-2cb8-46c3-b3ea-b845cdd2094c">
 			<when expression="#[vars.indexNumberStatus == true]">
