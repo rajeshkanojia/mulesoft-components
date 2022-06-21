@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="dynamic-evaluateFlow" doc:id="3527bb79-8b16-4650-9756-ecf0cfb95997" >
+		<http:listener doc:name="Listener" doc:id="02b7eb13-c73f-4de3-acf3-e73a6dfbf9fb" config-ref="HTTP_Listener_config" path="/dynamic-evaluate"/>
+		<set-variable value='#[if(isEmpty(attributes.queryParams.format)) "json" else attributes.queryParams.format]' doc:name="outputExtension" doc:id="ed347c96-5525-47ea-94e0-b122f3d7fbb9" variableName="outputExtension"/>
+		<ee:transform doc:name="var vDWLFile" doc:id="b60574ee-8036-44a3-8805-c001ce9a19e1" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="vDWLFile" ><![CDATA[%dw 2.0
+var myFile = (vars.outputExtension default "json" as String) match{
+	case "json" -> 'dwl/responseFormat/json.dwl'
+	case "xml" -> 'dwl/responseFormat/xml.dwl'
+	case "csv" -> 'dwl/responseFormat/csv.dwl'
+	else -> 'dwl/responseFormat/json.dwl'	
+} 
+output application/java
+---
+readUrl( 'classpath://' ++ myFile, "text/plain")]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:dynamic-evaluate doc:name="Dynamic Evaluate" doc:id="ecd6dbab-3a1b-418f-a080-360ae1c69c2f" expression="#[vars.vDWLFile]"/>
+	</flow>
+</mule>
