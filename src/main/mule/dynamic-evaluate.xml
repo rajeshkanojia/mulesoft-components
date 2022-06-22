@@ -7,6 +7,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<flow name="dynamic-evaluateFlow" doc:id="3527bb79-8b16-4650-9756-ecf0cfb95997" >
 		<http:listener doc:name="Listener" doc:id="02b7eb13-c73f-4de3-acf3-e73a6dfbf9fb" config-ref="HTTP_Listener_config" path="/dynamic-evaluate"/>
+		<logger level="INFO" doc:name="Logger" doc:id="0f2aab3d-3c8a-4e0e-b7e3-0d5edc89e1d3" message='#["request received"]'/>
 		<set-variable value='#[if(isEmpty(attributes.queryParams.format)) "json" else attributes.queryParams.format]' doc:name="outputExtension" doc:id="ed347c96-5525-47ea-94e0-b122f3d7fbb9" variableName="outputExtension"/>
 		<ee:transform doc:name="var vDWLFile" doc:id="b60574ee-8036-44a3-8805-c001ce9a19e1" >
 			<ee:message >

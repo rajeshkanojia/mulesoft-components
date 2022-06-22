@@ -30,6 +30,8 @@ Important takeaway :
 	How selector works
 	How final output looks just after scatter-gather and how to handle it.
 
+Extra : We can change the format of final response to XML by simply adding a HTTP Request connector and configure it for http://localhost:8081/dynamic-evaluate?format=xml 
+
 ***********************************************************************************************************************************************
 Module Name : Dynamic Evaluate Component
 URL : http://localhost:8081/dynamic-evaluate?format=xml
