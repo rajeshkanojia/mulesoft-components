@@ -14,11 +14,7 @@ http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/fil
 				<file:read doc:name="User records" doc:id="da8e3910-cd9f-4c95-9fac-ed5d846d2f39" config-ref="Read_File_Config" path='#["user-record/Users.csv"]' />
 				<ee:transform doc:name="User details" doc:id="991a00ac-f2d8-4d5d-b4bd-c643adcdb42f">
 			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
-import * from dw::core::Arrays
-output application/json
----
-(payload as Array firstWith ((item, index) -> item.id ~= vars.userID)) as {}]]></ee:set-payload>
+						<ee:set-payload resource="dwl/scatter-gather/user-detail-transformation.dwl" />
 			</ee:message>
 		</ee:transform>
 			</route>
@@ -26,13 +22,7 @@ output application/json
 				<file:read doc:name="Transactions" doc:id="e2607b4a-1557-4f4b-9278-384312dcc7bf" config-ref="Read_File_Config" path='#["user-record/Transactions.csv"]' />
 				<ee:transform doc:name="Transaction history" doc:id="ef6031c0-61de-40e3-876f-f5b60394490b">
 					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0
-import * from dw::core::Arrays
-output application/json
----
-((payload as Array map(item, index) -> 
-	("transaction" : item ++ {"type" : "transaction"})if(item.userid ~= vars.userID) 
-) filter $ != {}).*transaction]]></ee:set-payload>
+						<ee:set-payload resource="dwl/scatter-gather/transaction-transformation.dwl" />
 					</ee:message>
 				</ee:transform>
 			</route>
@@ -40,11 +30,7 @@ output application/json
 				<file:read doc:name="Songs" doc:id="f60c704a-c5e9-427e-bb64-9756f002c39f" config-ref="Read_File_Config" path='#["user-record/Songs.csv"]' />
 				<ee:transform doc:name="Songs history" doc:id="3747e56d-cda3-4559-8ee5-62007cab01bc">
 					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0
-import * from dw::core::Arrays
-output application/json
----
-((payload as Array map(item, index) ->  ("songs" : item ++ {"type" : "songs"})if(item.userid ~= vars.userID))filter $ != {}).*songs]]></ee:set-payload>
+						<ee:set-payload resource="dwl/scatter-gather/songs-transformation.dwl" />
 					</ee:message>
 				</ee:transform>
 			</route>
@@ -52,11 +38,7 @@ output application/json
 				<file:read doc:name="Movie" doc:id="cef3034e-bc85-4fb8-943e-a495f66e8cdf" config-ref="Read_File_Config" path='#["user-record/Movie.csv"]' />
 				<ee:transform doc:name="Movie history" doc:id="7c8cadeb-dcb3-4dd9-a9f2-7751dcb35744">
 					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0
-import * from dw::core::Arrays
-output application/json
----
-((payload as Array map(item, index) ->  ("movies" : item ++ {"type" : "movies"})if(item.userid ~= vars.userID))filter $ != {}).*movies]]></ee:set-payload>
+						<ee:set-payload resource="dwl/scatter-gather/movies-transformation.dwl" />
 					</ee:message>
 				</ee:transform>
 			</route>
@@ -64,11 +46,7 @@ output application/json
 				<file:read doc:name="Medication" doc:id="64eef30c-f13e-4aef-bd5c-11a003f423ce" config-ref="Read_File_Config" path='#["user-record/Medication.csv"]' />
 				<ee:transform doc:name="Medication history" doc:id="6cd7f2e7-e13f-45c5-8b08-5b633b69d458">
 					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0
-import * from dw::core::Arrays
-output application/json
----
-((payload as Array map(item, index) ->  ("medications" : item ++ {"type" : "medications"})if(item.userid ~= vars.userID))filter $ != {}).*medications]]></ee:set-payload>
+						<ee:set-payload resource="dwl/scatter-gather/medication-transformation.dwl" />
 					</ee:message>
 				</ee:transform>
 			</route>
@@ -76,11 +54,7 @@ output application/json
 				<file:read doc:name="Drinks" doc:id="50b2b8ca-edec-4d77-9a03-c12aa632b573" config-ref="Read_File_Config" path='#["user-record/Drinks.csv"]' />
 				<ee:transform doc:name="Drink history" doc:id="1779cdc4-41f7-4c09-b903-72c151ff9dac">
 					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0
-import * from dw::core::Arrays
-output application/json
----
-((payload as Array map(item, index) ->  ("drinks" : item ++ {"type" : "drinks"})if(item.userid ~= vars.userID))filter $ != {}).*drinks]]></ee:set-payload>
+						<ee:set-payload resource="dwl/scatter-gather/drink-transformation.dwl" />
 					</ee:message>
 				</ee:transform>
 			</route>
@@ -88,52 +62,14 @@ output application/json
 				<file:read doc:name="Books" doc:id="47e5b0d9-ca02-4af3-9ae2-6555dbae9277" config-ref="Read_File_Config" path='#["user-record/Books.csv"]' />
 				<ee:transform doc:name="Book history" doc:id="e10a1c4b-1096-458d-8669-0014101ec4f2">
 					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0
-import * from dw::core::Arrays
-output application/json
----
-((payload as Array map(item, index) ->  ("books" : item ++ {"type" : "books"})if(item.userid ~= vars.userID))filter $ != {}).*books]]></ee:set-payload>
+						<ee:set-payload resource="dwl/scatter-gather/books-transformation.dwl" />
 					</ee:message>
 				</ee:transform>
 			</route>
 		</scatter-gather>
 		<ee:transform doc:name="final transformation" doc:id="dab28c0b-e636-4553-b9f1-5fc23dd53c27" >
 			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{
-	"name" : payload[0].payload.name as String,
-	"email" : payload[0].payload.email as String,
-	"phone" : payload[0].payload.phone as String,
-	"transaction-details" : payload[1].payload map((item, index) -> {
-		"item" : item.item as String,
-		"amount" : item.Amount as String,
-		"date" : item.Date as String,
-	}),
-	"songs" : payload[2].payload map((item, index)->{
-		"song" : item.Song as String,
-		"date" : item.Date as String,
-	}),
-	"movies" : payload[3].payload map((item, index)->{
-		"title" : item.title as String,
-		"date" : item.date as String,
-	}),
-	"medications" : payload[4].payload map((item, index)->{
-		"medication" : item.medication as String,
-		"date" : item.date as String,
-	}),
-	"drinks" : payload[5].payload map((item, index)->{
-		"drink" : item.drinks as String,
-		"date" : item.date as String,
-	}),
-	"books" : payload[6].payload map((item, index)->{
-		"book" : item.book as String,
-		"date" : item.date as String,
-	})	
-	
-}
-]]></ee:set-payload>
+				<ee:set-payload resource="dwl/scatter-gather/final-transformation.dwl" />
 			</ee:message>
 		</ee:transform>
 	</flow>
