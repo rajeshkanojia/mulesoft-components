@@ -133,15 +133,6 @@ output application/json
 	})	
 	
 }
-
-//payload..*payload
-/*
-payload[1].payload.*transaction map(item) -> {
-	"amount" : item.Amount,
-	"date" : item.Date
-}
-*/
-
 ]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>

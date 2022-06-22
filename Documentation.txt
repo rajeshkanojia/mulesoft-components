@@ -1,3 +1,36 @@
+Module Name : Scatter Gather Module
+URL : http://localhost:8081/user/{id}
+	  id -  ASJ80SPW6GW | QYO02IHJ4CT | PKX71MDR7TX | XMC46BJB8RT | KLY23XPY8BA | RIS45QSH4NG | PDH21WYL3QN | RMO23FNM8ZE | UPQ74SZR4GJ | JLR04AMT4SR | CFN06GBY7EB | ZQX26APL1AT | OLT25NPY3UK | MCB21QLB4BY | MJK16RRR2OH	
+Method Type : GET
+Connector and Component used:
+	Scatter-Gather
+	HTTP
+	File
+	Transformation
+Module Description : 
+	We have total 7 csv file stores different details of a user.
+		User Details - details of user the user. fields(id, name, email, phone, etc)
+		Transaction - transaction history of user. fields(userid, transaction, date)
+		Songs - song history of user. fields(userid, song, date)
+		Movie - movie history of user. fields(userid, title, date)  
+		Medication - medication history of user. fields(userid, medication, date)  
+		Drink - drink history of user. fields(userid, drink, date)  
+		Book - book history of user. fields(userid, book, date)  
+
+	In this project we are simply passing the id of the user in URL and application collect all the related information from these seven file base on user id.	
+
+
+	We haven't manage any kind of error/exception in the application so if you mistype the ID it will show you error message.
+	
+
+
+Important takeaway :
+	How scatter-gather works
+	Mapping of DW function
+	How selector works
+	How final output looks just after scatter-gather and how to handle it.
+
+***********************************************************************************************************************************************
 Module Name : Dynamic Evaluate Component
 URL : http://localhost:8081/dynamic-evaluate?format=xml
 Method Type : POST
