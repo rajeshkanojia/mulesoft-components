@@ -5,3 +5,4 @@ http:
 file:
   readPath: "C:\\Users\\Rajesh\\AnypointStudio\\studio-workspace\\mulesoft-components\\src\\main\\resources\\sample-data\\"
   writePath : "C:\\Users\\Rajesh\\AnypointStudio\\studio-workspace\\mulesoft-components\\src\\main\\resources\\output\\"  
+  
