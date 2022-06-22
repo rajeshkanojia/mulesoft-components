@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="round-robin-main-flow" doc:id="db88d2d5-236c-4537-a0b3-64fb2c364604" >
+		<http:listener doc:name="round-robin" doc:id="449f2629-b22c-47c6-b4c1-48d208f92d4a" config-ref="HTTP_Listener_config" path="/round-robin"/>
+		<file:read doc:name="User data" doc:id="f684af05-0223-420e-b863-92b13832f651" config-ref="Read_File_Config" path='#["user-data.json"]'/>
+		<ee:transform doc:name="Transform Message" doc:id="2a8353dd-27ec-48d9-96f7-423eb8dfa130" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="b23c4321-c20c-4490-8832-775d492edfb7" >
+			<round-robin doc:name="Round Robin" doc:id="1d06e53e-1c75-4726-9b3a-f2c7e1e95052" >
+				<route >
+					<http:request method="POST" doc:name="Route - one" doc:id="3ebe0c29-1add-4b9a-bc87-411efa149e28" config-ref="HTTP_Request_configuration" path="/route1"/>
+				</route>
+				<route >
+					<http:request method="POST" doc:name="Route - two" doc:id="4b61792b-43c3-4d41-a608-26621edf8fd3" config-ref="HTTP_Request_configuration" path="/route2"/>
+				</route>
+			</round-robin>
+		</foreach>
+	</flow>
+	<flow name="route-1-flow" doc:id="0a9de043-cbac-4f8d-b666-fa65b450665b" >
+		<http:listener doc:name="route-1" doc:id="96fdb4db-6139-427f-9ed1-dec40f4054ad" config-ref="HTTP_Listener_config" path="/route1"/>
+		<logger level="INFO" doc:name="Logger" doc:id="1a2b22e3-893e-46d8-9421-672473b256d6" message='#[payload ++ {"route number" : "one"}]' />
+	</flow>
+	<flow name="round-robinFlow" doc:id="6c02a543-c39b-4fdc-8172-ffb42872dd9b" >
+		<http:listener doc:name="route-2" doc:id="37fe9371-9e00-4767-80d1-6179d4e544df" config-ref="HTTP_Listener_config" path="/route2"/>
+		<logger level="INFO" doc:name="Logger" doc:id="2f9d2756-a0ff-4430-93cc-0648eafdd32a" message='#[payload ++ {"route number" : "two"}]' />
+	</flow>
+</mule>
