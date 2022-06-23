@@ -12,7 +12,7 @@ Module Description :
 
 
 Important takeaway :
-	If for each encounter any error during processing it simply stop the execution. So best practice is to wrap for-each in try block and handle the error through "No Error Continue", it will help you to iterate the very last element of the payload array.
+	If for each encounter any error during processing it simply stop the execution. So best practice is to wrap for-each in try block and handle the error through "On Error Continue", it will help you to iterate the very last element of the payload array.
 
 	One another important concept is the initial and final payload(after processed) will be always same. you can only access the modified payload with in for-each scope, if you want to access it outside for-each scope, define a variable before for-each and keep updating the variable with in for each.
 
