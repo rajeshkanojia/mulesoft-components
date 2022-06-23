@@ -1,3 +1,24 @@
+Module Name : For Each
+URL 1 : http://localhost:8081/for-each (for flow for-each-with-error-handling-flow)
+URL 2 : http://localhost:8081/for-each (for flow for-each-with-error)
+Method Type : GET
+Connector and Component used:
+	For each
+	Try Block
+	Error Handling
+Module Description : 
+	Flow for-each-with-error demonstrate how for each respond when it encounter any error during execution.
+	Flow for-each-with-error-handling-flow demonstrate how to handle error during execution
+
+
+Important takeaway :
+	If for each encounter any error during processing it simply stop the execution. So best practice is to wrap for-each in try block and handle the error through "No Error Continue", it will help you to iterate the very last element of the payload array.
+
+	One another important concept is the initial and final payload(after processed) will be always same. you can only access the modified payload with in for-each scope, if you want to access it outside for-each scope, define a variable before for-each and keep updating the variable with in for each.
+
+	If you declare Batch size > 1 then payload with in for-each will be Array in case of 1 its type will be Object.  
+
+***********************************************************************************************************************************************
 Module Name : Round Robin Module
 URL : http://localhost:8081/round-robin
 Method Type : GET
