@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="for-each-with-error-handling-flow" doc:id="85701e58-7643-443f-8520-44918b83332c" >
+		<http:listener doc:name="Listener" doc:id="7bff84f6-81bd-4d40-933a-355fbe69125e" config-ref="HTTP_Listener_config" path="/for-each"/>
+		<set-payload value='#[[1,2,3, "a", "b", 7, 8]]' doc:name='[1,2,3, "a", "b", 7, 8]' doc:id="dc0db3d0-9f8c-4bec-92f5-dab4deb5e8ba" />
+		<set-variable value="#[[]]" doc:name="successPayload" doc:id="09795c74-5d12-4579-bf19-18daae4b7c53" variableName="successPayload"/>
+		<set-variable value="#[[]]" doc:name="failPayload" doc:id="a926a189-1579-408f-be7b-3b622676b69d" variableName="failPayload"/>
+		<foreach doc:name="For Each" doc:id="9d1bd713-34bf-4168-8fb8-0099e0060335">
+			<try doc:name="Try" doc:id="af3d0002-c66c-4dec-9483-ecd1feff8739" >
+				<set-payload value="#[payload * 10 as Number]" doc:name="Set Payload" doc:id="e5181e60-f0fd-47b4-ae71-e90d749f8606" />
+				<set-variable value="#[vars.successPayload + payload]" doc:name="successPayload" doc:id="c3121104-e846-4f29-ae94-1590c18f8672" variableName="successPayload" />
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="35f691c1-2122-4828-9ecc-cdfdb6955fdc" type="ANY">
+						<logger level="INFO" doc:name="Logger" doc:id="d6d545bd-2962-4204-98de-cec3d0d1c7be" message="#[payload]"/>
+						<set-variable value="#[vars.failPayload + payload]" doc:name="failPayload" doc:id="968aed6b-2187-4b64-bb4c-484034b2b217" variableName="failPayload"/>
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</foreach>
+		<ee:transform doc:name="Transform Message" doc:id="5c0f3688-b167-448b-867a-dada984b70a8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	actualPayload : payload,
+	successPayload : vars.successPayload,
+	failPayload : vars.failPayload
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="for-each-with-error" doc:id="79351bab-b044-402b-af98-79df2475fa49" >
+		<http:listener doc:name="Listener" doc:id="02b951d8-4c38-4428-80f9-2dbc266ef275" config-ref="HTTP_Listener_config" path="/loop-with-error"/>
+		<set-payload value='#[[1,2,3,"a",4,"b",5]]' doc:name='[1,2,3,"a",4,"b",5]' doc:id="1d93b72d-2c2b-4822-96fa-0cdf150a08f9" />
+		<foreach doc:name="For Each" doc:id="3b2a279e-6e3b-44ab-8b3c-e443b1acae87" >
+			<set-payload value="#[payload * 5]" doc:name="payload * 5" doc:id="a99aaaed-7ccd-4ed3-88f6-f9d1c66a6b6d" />
+			<logger level="INFO" doc:name="Logger" doc:id="df257bae-0644-4dcc-a065-fb167a18d624" message='#["payload in for each : " ++ payload]'/>
+		</foreach>
+		<logger level="INFO" doc:name="Logger" doc:id="006bf759-0bde-407f-9dde-719eba35ba26" message='#["final payload : " ++ payload]'/>
+	</flow>
+</mule>
